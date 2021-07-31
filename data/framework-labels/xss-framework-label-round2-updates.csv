@@ -1,0 +1,26 @@
+repo_url,fix_commit,framework,triage_status,note
+https://github.com/Deteriorator/Python-Flask-Web-Development,53be4c48ffbe7d30a1bde5717658f6de81820360,flask,true_positive,New rule(https://github.com/returntocorp/semgrep-rules/pull/1087/files)
+https://github.com/alshapton/kb-api,0c1ff2b664eb501f07cb3a4e6762be5fd6571a44,flask,true_positive,Fixed rule(https://github.com/returntocorp/semgrep-rules/pull/1088/files)
+https://github.com/alshapton/kb-api,1f514dead0f74ea3f85cbdccd49d67cdf7e258f8,flask,true_positive,Fixed rule(https://github.com/returntocorp/semgrep-rules/pull/1088/files)
+https://github.com/alshapton/kb-api,8dafd71134ff205b902f794b87b4b162d5292712,flask,true_positive,Fixed rule(https://github.com/returntocorp/semgrep-rules/pull/1088/files)
+https://github.com/alshapton/kb-api,bd649de1da9e4020f9273fff183a74edfadc0b07,flask,true_positive,Fixed rule(https://github.com/returntocorp/semgrep-rules/pull/1088/files)
+https://github.com/desihub/nightwatch,e78f09ae9eeec16cf67793621b127b9cde408f88,flask,true_positive,Manual test confirmed detection;uncertain why automated process did not detect
+https://github.com/desihub/nightwatch,1e47387a96d2d7d5aaf6ac69277f505e4f5fa6cd,flask,DELETE,This was actually a path traversal not an XSS
+https://github.com/EdLahatra/vsc,298a4f8e58c070cd1d702f9e84a3ece5d145d15e,clientside_javascript,true_positive,Framework originally mislabeled as Express
+https://github.com/MaxiBal/Step-Counter,3d83278bbf5f97cfb970f21b8b6b611818bbabc5,clientside_javascript,true_positive,Framework originally mislabeled as Express
+https://github.com/NarutoVPS/Envoy,3c2e890b99a80f8bd2b0bb20594871b93edbb8a6,clientside_javascript,true_positive,Framework originally mislabeled as Express
+https://github.com/ThewBear/do-forem,ab95635dc6ffab6fa6218de1ff1759927f78356e,clientside_javascript,false_negative,Framework originally mislabeled as Express
+https://github.com/ZenMnky/blogful-zenmnky,2eaa8ed5c460241f3df1d9c95113fffc1e631c01,express,DELETE,Removes an XSS example; not actually a vulnerability
+https://github.com/ZenMnky/blogful-zenmnky,a31caa63bf81524f9a3d86f2865ebea8b4f5d411,express,DELETE,Preventative; not actually a vulnerability
+https://github.com/1Lighty/BetterDiscordPlugins,9a26357006f18bbc9e793f8c999ab31f5b4bf19f,javascript,true_positive,Detected with browser JS rules - raw-html-concat
+https://github.com/Alex1100/github-readme-stats,0833e8531d0445dd461956b805e69a36d183f021,javascript,true_positive,Detected with browser JS rules - raw-html-concat
+https://github.com/UWB-ACM/crowfacts,5cfbdbfb48aad2d284cfcfc022e759f3a73c7534,javascript,true_positive,Detected with browser JS rules - innerHTML
+https://github.com/MaxLeGrelle/Openhifi-frontend,a119d177d5f076295b34604943271dcd90a78da8,javascript,true_positive,Detected with browser JS rules - jQuery
+https://github.com/UltimatePro-Grammer/websystem,715660fcfadea276944e47da8a85ae91f540f5b1,javascript,true_positive,Detected with browser JS rules - innerHTML
+https://github.com/beenotung/wallpaper,7204f8899fc52d0d47a457cb3db2ae0b2084f739,javascript,DELETE,This is actually a command injection; not an XSS
+https://github.com/anuraghazra/github-readme-stats,34b5dcb181cc96a38ff62bc31643e667be0daea9,javascript,DELETE,Dupe
+
+
+
+
+

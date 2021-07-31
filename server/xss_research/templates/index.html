@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+  <script src="static/sorttable.js"></script>
+  <style>
+    table.sortable thead {
+        background-color:#eee;
+        color:#666666;
+        font-weight: bold;
+        cursor: default;
+    }
+  </style>
+</head>
+<body class="f7" style="font-family: 'Roboto Mono', monospace;">
+  <table class="sortable">
+    <thead>
+      <tr>
+        <th class="fw6 tl pa3">Repository URL</th>
+        <th class="fw6 tl pa3">Triage Status</th>
+        <th class="fw6 tl pa3">Reviewer Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for finding in findings -%}
+      <tr>
+        <td class="tl pa3 bb b--black-20"><a href="{{ url_for('details', finding_id=finding.id) }}">{{ finding.repo_url }}</a></td>
+        <td class="tl pa3 bb b--black-20">{{ finding.triage_status.value }}</td>
+        <td class="tl pa3 bb b--black-20">{{ finding.reviewer_notes | truncate(80) }}</td>
+      </tr>
+    {%- endfor %}
+    </tbody>
+  </table>
+</body>

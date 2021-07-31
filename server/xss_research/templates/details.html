@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- CSS -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css" />
+
+        <!-- Javascripts -->
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/diff2html/bundles/js/diff2html-ui.min.js"></script>
+
+        <style>
+            pre {
+                overflow-x: auto;
+                white-space: pre-wrap;
+                white-space: -moz-pre-wrap;
+                white-space: -pre-wrap;
+                white-space: -o-pre-wrap;
+                word-wrap: break-word;
+            }
+
+            .row {
+                display: flex;
+            }
+
+            .column {
+                flex: 50%;
+                padding: 2px;
+                border: 1px solid black;
+            }
+        </style>
+    </head>
+    <body>
+        <a href='{{ url_for("index") }}'>^^^ Index</a>
+        <a href='{{ url_for("details", finding_id=finding_id-1) }}'><-- Back</a>
+        <a href='{{ url_for("details", finding_id=finding_id+1) }}'>Next --></a>
+        <h1>{{ repo_url }}</h1>
+        {{ repo_message }}
+	<h3><--- <a href="https://github.com/{{ repo_url_path }}/commit/{{ previous_commit }}">{{ previous_commit }}</a></h3>
+	<h3>---> <a href="https://github.com/{{ repo_url_path }}/commit/{{ fix_commit }}">{{ fix_commit }}</a></h3>
+        
+        <form action="{{ url_for('update', finding_id=finding_id) }}" method="post", id="update-triage-status">
+
+            {% if triage_status == "👍" %}
+                <input type="submit" id="tp" name="triage_status" value="👍" style='background-color: lightgreen'> 
+            {% else %}
+                <input type="submit" id="tp" name="triage_status" value="👍"> 
+            {% endif %}
+
+            {% if triage_status == "👎" %}
+                <input type="submit" id="fp" name="triage_status" value="👎" style='background-color: lightcoral'> 
+            {% else %}
+                <input type="submit" id="fp" name="triage_status" value="👎"> 
+            {% endif %}
+
+            {% if triage_status == "🤷" %}
+                <input type="submit" id="unknown" name="triage_status" value="🤷" style='background-color: lightsteelblue'>
+            {% else %}
+                <input type="submit" id="unknown" name="triage_status" value="🤷"> 
+            {% endif %}
+
+            <!--
+                A = "👍 Detected XSS, and the fix addressed the finding"
+                B = "👍 Detected XSS, but the fix was not the fix recommended by the policy (e.g., detected unsafe template, but fix was in server code)"
+                C = "😐 Framework not covered"
+                D = "😐 Language not covered"
+                E = "👎 XSS not detected
+            -->
+            <br>
+            <input type="radio" id="A" name="taxonomy" value="A" {% if taxonomy == "A" %} checked {% endif %}> 
+            <label for="A">👍 Detected XSS, and the fix addressed the finding</label><br>
+            <input type="radio" id="B" name="taxonomy" value="B" {% if taxonomy == "B" %} checked {% endif %}> 
+            <label for="B">👍 Detected XSS, but the fix was not the fix recommended by the policy</label><br>
+            <input type="radio" id="C" name="taxonomy" value="C" {% if taxonomy == "C" %} checked {% endif %}> 
+            <label for="C">😐 Framework not covered</label><br>
+            <input type="radio" id="D" name="taxonomy" value="D" {% if taxonomy == "D" %} checked {% endif %}> 
+            <label for="D">😐 Language not covered</label><br>
+            <input type="radio" id="E" name="taxonomy" value="E" {% if taxonomy == "E" %} checked {% endif %}> 
+            <label for="E">👎 XSS not detected</label><br>
+
+        </form>
+        <textarea name="reviewer_notes" form="update-triage-status" style="width: 50%; height: 300px">{{ reviewer_notes }}</textarea>
+
+        <div id="diff-pane"></div>
+        <div id="diff-text" style="display:none">
+            {{ diffstring }}
+        </div>
+
+        <div id="semgrep-findings" class="row">
+            <div class="column">
+                <pre>{{ semgrep_results_on_diff }}</pre>
+            </div>
+        </div>
+        <script>
+            const targetElement = document.getElementById("diff-pane");
+            const configuration = {
+                outputFormat: 'side-by-side',
+            };
+
+            const diffString = document.getElementById("diff-text").innerHTML;
+
+            const diff2html = new Diff2HtmlUI(targetElement, diffString, configuration);
+            diff2html.draw();
+        </script>
+    </body>
+</html>

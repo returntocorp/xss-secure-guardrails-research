@@ -1,0 +1,442 @@
+,repo_url,fix_commit,previous_commit,triage_status,reviewer_notes,taxonomy,framework
+0,https://github.com/13656677331/newbee-mall,ed8016ef3fffd5e1fd81a84fe6d89889f7b756b9,7f59ead63cc22b95105036952c3f066f7712ae97,false_positive,"Not really sure why this is an XSS, or why it's considered one.
+
+If I were to guess, `MallUser userFromDB` gets rendered somewhere.",E,spring
+1,https://github.com/1Lighty/BetterDiscordPlugins,9a26357006f18bbc9e793f8c999ab31f5b4bf19f,11ed917b53ef2c48087190e5ce40739dea27f7b4,false_positive,,E,javascript
+2,https://github.com/22hours/DevStudent,3933726d8364e10ebb8c26448485e386dbf73949,06f2df2c7e5c3892ad0e57de48164eaa23bad015,false_positive,,E,react
+3,https://github.com/2xlink/DrawPhone,332e29454520a98bb3f6720b722320ddb78a04c0,86341fb3c99aa3c0e4f59dedb0a6d2969cf880dc,false_positive,"Did not detect. This is a reflective XSS simply by retrieving a GET parameter and inserting in with innerHTML.
+
+Look into https://github.com/returntocorp/semgrep-rules/blob/develop/javascript/browser/security/insecure-innerhtml.yaml",E,clientside_javascript
+4,https://github.com/ASO1901029/sk2020_5K,43fb1de722790a77eb4286dfcc3dab5b049e4c70,709c4daba0b8ac21c0c1d58b53d6f84ab19bce55,false_positive,This is another instance of JS template strings + injecting into HTML,E,clientside_javascript
+5,https://github.com/Aalto-LeTech/CodeClusters,c67185211c58b7bffbb36596d80b5d51d9aeeb85,348957aa1d15d3e3bc73d34231866152ef643270,false_positive,Need to add `dangerouslySetInnerHtml` to `p/xss`. That would detect this,E,react
+6,https://github.com/AaronKutch/pbe-participation-tracker,d44453e55d20178019506c6844c6580bc4dd7cea,8ba07f36bf9c0c5c756fafa6a1825401eef67265,true_positive,Use of `raw` in ERB file,A,rails
+7,https://github.com/Adowrath/sdent-combat-systems,b6cc6b4916d594ac9f5aeed34d4c4c93dafc1a12,d213fac34cb495aa7f91715462f9f090c7e32f13,false_positive,postMessage XSS. Would detect with `javascript.browser.security.insufficient-postmessage-origin-validation.insufficient-postmessage-origin-validation`,E,clientside_javascript
+8,https://github.com/Alex1100/github-readme-stats,0833e8531d0445dd461956b805e69a36d183f021,3c7220e4f7144f6cb068fd433c774f6db47ccb95,false_positive,Not detected. Need that HTML + template string rule.,E,javascript
+9,https://github.com/Amarpal-kaur/handlebars.js,b291a1ad8c9a33f834d126450635f0b6ca546a0c,038d9b3feed51bc12db95af0e0ef8b69776b42c9,false_positive,"Looks like a copy of the Handlebars framework, the predecessor to Mustache. Seems like this is the escape function for the library.
+
+Could detect with a rule that looks for replacing < and >, which is a common but incomplete attempt at sanitizing XSS.",E,javascript
+10,https://github.com/Amsterdam/fixxx-schuldhulp,25c938ddef1fd88ad8124d8a02ec15eb857e77e4,9d24eaebeecb53cb3ab325c71ebc841fa39166de,false_positive,innerHTML XSS again.,E,clientside_javascript
+11,https://github.com/Atlasfreak/Django-Website,f7e687fbea72ac30a00a67c31b36b9fbeae744ed,3f4c9ccfe6a103e53b487b8edeb964bb35db80a3,false_positive,"INVESTIGATE FURTHER This is another Django Forms issue, similar to a previous one.
+
+I'm not sure if there's some vulnerability here we're unaware of; need to investigate.",E,django
+12,https://github.com/B3Partners/tailormap,1bbecac22181eb86aaa1fd952d8761c2d627d312,49a1748a53a9047568c2690624fad8229c899a4b,true_positive,"Weird - issue was actually in `error.jsp`, but Semgrep did not run on it.
+
+Manual testing shows that Semgrep correctly detects the issue:
+
+```
+➜  tailormap git:(master) semgrep -f p/xss viewer/src/main/webapp/error.jsp
+A new version of Semgrep is available. Please see https://github.com/returntocorp/semgrep#upgrading for more information.
+using config from https://semgrep.dev/p/xss. Visit https://semgrep.dev/registry to see all public rules.
+downloading config...
+running 61 rules...
+100%|█████████████████████████████████████████████████████████████████████|61/61
+viewer/src/main/webapp/error.jsp
+severity:warning rule:java.lang.security.audit.xss.jsp.no-scriptlets.no-scriptlets: JSP scriptlet detected. Scriptlets are difficult to use securely and
+are considered bad practice. See https://stackoverflow.com/a/3180202.
+Instead, consider migrating to JSF or using the Expression Language
+'${...}' with the escapeXml function in your JSP files.
+
+1:<%--
+--------------------------------------------------------------------------------
+25:<%=response.getStatus()%></title>
+--------------------------------------------------------------------------------
+30:<%=response.getStatus()%></p>
+ran 61 rules on 1 files: 3 findings
+22 files could not be analyzed; run with --verbose for details or run with --strict to exit non-zero if any file cannot be analyzed
+```",B,java_and_jsp
+13,https://github.com/BarreraR/gainz-api,1f040d15c99fd64504cbe6025f56519ac65a72ed,880db49663b9d8138e162385f5c0458102d29c98,false_positive,,E,express
+14,https://github.com/Bolawa09/Bola,0edb5437250e2a14263b730016665d7f1ee0ac39,bda65fc1362ac0b5057a8805277fb2d30176fef2,true_positive,"Manual testing detects HTML concatenation:
+
+```
+public/js/chat.js
+severity:warning rule:javascript.browser.security.raw-html-concat.raw-html-concat: User controlled data in a HTML string may result in XSS
+726:  $("".chat-messages"").append(
+727:    '<div class=""message-item moderator cssanimation fadeInBottom""><div class=""message-bloc""><div class=""message"">' +
+728:      msg.autoLink() +
+729:      ""</div></div></div>""
+730:  );
+```",B,clientside_javascript
+15,https://github.com/Boris-Michiels/web3-project-Boris-Michiels,0db76570671dc4853009f0b5689b691ee063a83a,63db18788f48d9b9a33cda223276227ce0808297,true_positive, Preventative. Adds `c:out` to JSP pages. This is good; we look for `escapeXml` instead. We also detect all these cases.,B,java_and_jsp
+16,https://github.com/BurningAlpha/App-Sec-Project,df44239e9a7ba702c455d48d16df913e13fbb190,e8f6312c3ddd13fec1d8239d0bb82a620d1816e2,true_positive,"Detected XSS in search.html.
+
+Did not detect innerHTML in product.html.",A,flask
+17,https://github.com/CodeWe-projet/CodeWe,2111dffdea84bf74f642eeae915bafa8c4fb68ee,b6f40df80fbd7fdc080a4d32888c1852680dbc43,false_positive,"innerHTML, which we do not detect",E,clientside_javascript
+18,https://github.com/ColorlibHQ/AdminLTE,903143a1e1c02b94ec1194b7cec65675755c14a9,d114eabfe6189892e0b33dc76d36b6b39ff37b29,false_positive,"JQuery .html() method, not currently detected",E,clientside_javascript_embedded_in_html
+19,https://github.com/ColorlibHQ/AdminLTE,b0f9c48ea506276b8db561957135bc4546b34928,8974feb54ce0556817f28dade649d8d5318308c1,false_positive,"Might get detected by Jquery rule? In either case, we do not detect this",E,clientside_javascript_embedded_in_html
+20,https://github.com/CxTyler/JVL,99c79b8d05fa45d7975b2684186ec7a919c3fedd,b510bc56385177857fa37795ea558da5e49ef5b6,true_positive,Detected; this is an intentionally vulnerable app.,B,java_and_jsp
+21,https://github.com/DCaliari/PowerSet_Choice,88c23b3dbb05e446b5d63929d5ab6a6a0d66309c,1e7455ffb2a7ac302e4cbec4e24f47402e03fd5d,true_positive,Detected var in script tag.,B,django
+22,https://github.com/Datenyan/ThingRepository,23ce33e325821e6bacb8087e47750f19d013823c,8f0f0b7bc790674183b42d9587a47ad5435d6aa0,true_positive,"Manual test detects this with javascript.browser.security.raw-html-concat.raw-html-concat
+
+```
+➜  ThingRepository git:(8f0f0b7) semgrep -f p/xss res/js/ajax.js
+A new version of Semgrep is available. Please see https://github.com/returntocorp/semgrep#upgrading for more information.
+using config from https://semgrep.dev/p/xss. Visit https://semgrep.dev/registry to see all public rules.
+downloading config...
+running 61 rules...
+100%|████████|61/61
+res/js/ajax.js
+severity:warning rule:javascript.browser.security.raw-html-concat.raw-html-concat: User controlled data in a HTML string may result in XSS
+16:            table.append(
+17:                '<tr href=""#"" id=""' + result._id + '""><td><img width=""100px"" height=""100px"" src=""' + imgUrl + '"" /></td><td>' + result.name + '</td><td>' + result.description + '</td><td>$' + result.price + '</td><td>' + new Date(result.date).toDateString() + '</td></tr>'
+18:            )
+--------------------------------------------------------------------------------
+21:            console.log(""Failed with error "" + result.status);
+--------------------------------------------------------------------------------
+71:            itemModal.find(""#thingTitle"").html(""<strong>"" + result.name + ""</strong>"");
+--------------------------------------------------------------------------------
+74:            itemModal.find("".thingPrice"").text(""$"" + result.price);
+```",B,javascript
+23,https://github.com/Deteriorator/Python-Flask-Web-Development,53be4c48ffbe7d30a1bde5717658f6de81820360,6e22862cd65bf7f7093826954212b2e809cf3aad,false_positive,Did not detect. This is a variant on `directly-returned-format-string` which involves some data flow.,E,flask
+24,https://github.com/DevelopInspireCreate/DevelopInspireCreateWebsite,c39d5ea0c7f5436b1b8816cdb9ad33876c58bac6,fc66c734fd57d23f8f98e1203f2b478b1fd7601b,false_positive,Email-related XSS,C,express
+25,https://github.com/DisturbeD-347939/Mercury,7f5ca1ad1a9d8936c1d990c04228d86d75179c93,236999e5388c319dd138b689afa64331f04cf73b,false_positive,Did not detect. raw-html-concat also does not detect. ,E,clientside_javascript
+26,https://github.com/EOL/eol_website,f385f0b1aa95420a05ca9b01e1d04f2abef8f998,a982618b3855229cb138780eea4ca21956ba8ccb,true_positive,Detected .html_safe,A,rails
+27,https://github.com/EdLahatra/vsc,298a4f8e58c070cd1d702f9e84a3ece5d145d15e,c0f8c29a4992c71d92e1de88bd1051c10540ec63,false_positive,innerHTML XSS. Not detected,E,express
+28,https://github.com/Elbrah2020/ElectronLogger,ccacad3c625fa1ec3359586f913ba211d0b77ace,1bc67854c058a2aef1fff2655fc49be81f90e1ab,true_positive,"➜  ElectronLogger git:(1bc6785) semgrep -f p/xss src/view/js/rendererLogger.js
+A new version of Semgrep is available. Please see https://github.com/returntocorp/semgrep#upgrading for more information.
+using config from https://semgrep.dev/p/xss. Visit https://semgrep.dev/registry to see all public rules.
+downloading config...
+running 61 rules...
+100%|███████████|61/61
+src/view/js/rendererLogger.js
+severity:warning rule:javascript.browser.security.raw-html-concat.raw-html-concat: User controlled data in a HTML string may result in XSS
+6:		append += '<span class=""cyan"">' + packetName + '</span>&nbsp;<span class=""gray"">/</span>&nbsp;';
+--------------------------------------------------------------------------------
+8:	append += '<span class=""green"">' + header + '</span><span class=""red"">]</span>&nbsp;<span class=""gray"">-></span>&nbsp;<span class=""yellow"">' + message + '</span><br/>';
+--------------------------------------------------------------------------------
+16:		append += '<span class=""cyan"">' + packetName + '</span>&nbsp;<span class=""gray"">/</span>&nbsp;';
+--------------------------------------------------------------------------------
+18:	append += '<span class=""green"">' + header + '</span><span class=""blue"">]</span>&nbsp;<span class=""gray"">-></span>&nbsp;<span class=""yellow"">' + message + '</span><br/>';",B,electron
+29,https://github.com/Endi0n/GaSM,4df1fa81d72e85f52c9ae0cc2efbcba568e97878,ae65de3d9ec0807bcebb9527b9f5339f665c16ae,false_positive,JQuery .html method. Did not detect.,C,clientside_javascript
+30,https://github.com/Explosion-Scratch/chat-app,83af0edbca67b76df47f18b22f9dbe23dc814fd2,7323086a5d919daa54e6679b56e82d06a0dcc75e,true_positive,"➜  chat-app git:(7323086) semgrep -f p/xss script.js
+A new version of Semgrep is available. Please see https://github.com/returntocorp/semgrep#upgrading for more information.
+using config from https://semgrep.dev/p/xss. Visit https://semgrep.dev/registry to see all public rules.
+downloading config...
+running 61 rules...
+100%|███████████|61/61
+script.js
+severity:warning rule:javascript.browser.security.raw-html-concat.raw-html-concat: User controlled data in a HTML string may result in XSS
+212:    html +=
+213:      ""<li onclick='updatemessage(this)' data-channel='"" +
+214:      snapshot.val().channel +
+215:      ""'id='message-"" +
+216:      snapshot.key +
+217:      ""'>"";
+--------------------------------------------------------------------------------
+218:    html += ""<span id='message-sender'>"" + snapshot.val().sender;
+--------------------------------------------------------------------------------",B,clientside_javascript
+31,https://github.com/Fenrislol/grafana,0284747c88eb9435899006d26ffaf65f89dec88e,c9e7796b33a91267895c8e7b13e2090ea5270aca,false_positive,"TypeScript, not covered",D,
+32,https://github.com/GoogleCloudPlatform/fda-mystudies,7a531ce5efd446cfb72edff1c1fb506c734395e4,4ced05c27a37846a465b180ad0e9c2c100bdb394,true_positive,"Java + JSP = XSS's everywhere!
+
+This is actually an interesting case because precise detections would detect JavaScript INSIDE a JSP page. We consider this one ""detected"" because it flags all unescaped variables and JSP scriptlets. The ""correct"" path would begin to use a template engine and serve JavaScript separately.",B,java_and_jsp
+33,https://github.com/GoogleCloudPlatform/fda-mystudies,8eb6c708b853f3391be33a0e1f51ebb0d85cb9c1,d7ae1b637d0737bd8b5f832fcf320993e9e1d6bd,true_positive,,B,java_and_jsp
+34,https://github.com/GrzegorzLy/noteApp,b9267022d030b23d1a60eddc6a4ae06ba87c2571,e2e96753d2ce3abe47693c6a94a5c853e1c8d459,false_positive,🤨🤨🤨🤨 This change uses a sanitizer but assigns to `dangerouslySetInnerHtml`,C,react
+35,https://github.com/HALv2/tech_assign,ae5a2ef7b0ad20ee0b2494838170c6f0916c703d,55adf49e1bbb03b1d866acb2b5344cf1fd8a0842,false_positive,innerHTML. not detected,E,clientside_javascript
+36,https://github.com/HyungTaeKim8905/Chat-Team-Project,bcedc734de575994fab629461fe9bc4eb4f973b0,edc6e7f173174b4aaf4308a88cec027ed20c4e77,true_positive,Java + JSP = XSS,B,clientside_javascript
+37,https://github.com/IIIristraM/lerna-ts,6352bc104d1d47f2c3c7a87d6c5c7935f04535d6,546cf9551653f82b11ecfda48fcaac1ba523832b,false_positive,This is dangerouslySetInnerHtml,C,react
+38,https://github.com/JesusAngelGonzalez/SisInf2020,7db3c777bf58262ecd5e6f58bda8c8faf0b64121,372da6ea6b084aff112e72b1b54fb53acf1b8490,true_positive,"Diff is not here; however, on GitHub, diff is correctly shown: https://github.com/JesusAngelGonzalez/SisInf2020/commit/7db3c777bf58262ecd5e6f58bda8c8faf0b64121
+
+Detected this. Java + JSP again.",B,java_and_jsp
+39,https://github.com/JohnnyOfSnow/JohnnyOfSnow.github.io,325f83745fdeb98f398d19e788a938c5f430434d,1cc20fa9b713ed3d66e95b44ab6d84a251fc3c8c,false_positive,switches innerHTML to innerText. Did not detect.,E,clientside_javascript_embedded_in_html
+40,https://github.com/JustinH11235/HPictionary,94db4112fb8145833a24e8e22eaf04c27efabb29,b34a6ebed997680556e728ecda687e157e2b7c10,false_positive,Real problem here is innerHTML: https://github.com/JustinH11235/HPictionary/blob/69fea955a88a49bba8035182a355a15fd0cf9639/static/js/game.js#L100,E,express
+41,https://github.com/Kenobi-Knobs/Union,1b9d1c2b23333b039d64fffe239e1ea51b14761c,486a6b532ad2c1e0068df8dd000726a73f911343,false_positive,"Not detected. The fix here ""sanitizes"" input going into a database. I assume this gets rendered somewhere, which we did not detect with Semgrep.",E,unknown
+42,https://github.com/Kogoon/Flask-secure-coding,4b1f71eaffcb0574e25ff35f5cd584dbb4df8223,e4c0a6504255181403b3b88d9f99909517ef9ea0,true_positive,,A,flask
+43,https://github.com/Kommunicate-io/Kommunicate-Web-SDK,874b59b1564c1a28b32a6cfb372d65076aca680c,6b602a800c70fbcb1036f27706496492bd57b563,true_positive,"➜  Kommunicate-Web-SDK git:(master) semgrep -f p/xss webplugin/js/app/km-post-initialization.js
+A new version of Semgrep is available. Please see https://github.com/returntocorp/semgrep#upgrading for more information.
+using config from https://semgrep.dev/p/xss. Visit https://semgrep.dev/registry to see all public rules.
+downloading config...
+running 61 rules...
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████|61/61
+webplugin/js/app/km-post-initialization.js
+severity:warning rule:javascript.browser.security.raw-html-concat.raw-html-concat: User controlled data in a HTML string may result in XSS
+24:                $applozic(""#km-faq-list-container"").append('<li class=""km-faq-list"" aria-disabled=""false"" role=""button"" tabindex=""0"" data-source=""' + faq.source + '"" data-articleId=""' + faq.articleId + '""><a class=""km-faqdisplay""><div class=""km-faqimage"">' + KommunicateUI.faqSVGImage + '</div> <div class=""km-faqanchor"">' + title + '</div></a></li>');
+ran 61 rules on 1 files: 1 findings",A,clientside_javascript
+44,https://github.com/Kommunicate-io/Kommunicate-Web-SDK,f8f05bd04198ebbc6826c0f7bff4ea1503c078de,874b59b1564c1a28b32a6cfb372d65076aca680c,false_positive,JQuery rule should cover this,E,clientside_javascript
+45,https://github.com/LastRoze/Readme-Stats,0833e8531d0445dd461956b805e69a36d183f021,3c7220e4f7144f6cb068fd433c774f6db47ccb95,false_positive,JS template strings rule needed,E,javascript
+46,https://github.com/Laurens54321/WebProject,4a4b7abd44aeed43c15da02e074a25f60fe31dea,1c7ac065083cbb9652c4c7d466343b5079b3c489,true_positive,,A,java_and_jsp
+47,https://github.com/Lavanttal/ChatApp,041b9c8a8de298f98373258eabb67cc26fdc44eb,ee7ea089badbe3630cc1ac8befe79b27e94eb6a1,false_positive,Potentially detected by JQuery rule,E,express
+48,https://github.com/Lidemy/mentor-program-4th-MoreCoke,b019e33ecabecec20c6e9ec162ae2994695ce3ea,ac1f5aec3c7bb18a85af29f580d407554a3e93d3,false_positive,JS template string,E,clientside_javascript_embedded_in_html
+49,https://github.com/Lidemy/mentor-program-4th-MoreCoke,e6ebdfd78a0275083dd9bf53939fbc4119f5719e,c829d75f50b08c11bb04d1e3c663156402ca23b5,false_positive,JS template string,E,clientside_javascript_embedded_in_html
+50,https://github.com/LilJuiceBox491/Mod-Talk,5ed8ef5312012c226d62a0dc0a0b0f805203605d,000054b09a8e20e88bc80a8079c7ce079860dd31,false_positive,innerHTML,E,
+51,https://github.com/Lumieducation/H5P-Nodejs-library,9d37f702897197b130274ff2e8145dfcc2b6728b,aad59b00ba9593cbdff2a3ed54092522eb0200a1,false_positive,"INVESTIGATE further. Xss due to ""double escaping""",E,
+52,https://github.com/MTES-MCT/acceslibre,7259928c85c27273be076b2938a6c960444c3132,4d7d8f34223662c8b78c84fe11ecf1c95583f481,false_positive,JQuery weirdness. Not sure if we'd detect it with the JQuery rule.,E,clientside_javascript_embedded_in_html
+53,https://github.com/Mahananda-Kawale/thynkcloud,05d831df29be6d1b8f1d248ef408ee231fd15cf6,14b2dad9da08bf864a5519ed106cb248ee7d814f,false_positive,,D,
+54,https://github.com/MangaD/SIRS-Project,1a6a646fdc09bdaf8ba4e58c605722ce3cb22acf,2cfa6214a9b4a998cdbad7bd1a50e736cf9e5e92,false_positive,Not detected. Might need an improvement to the raw-html-concat rule,E,clientside_javascript_embedded_in_html
+55,https://github.com/Mario-Duarte/image-zoom-plugin,37d29114060bbdb32269021ea4d54521823ebfb4,cd00b69ec4fd49699b37d10059de3c383a5a48d3,false_positive,JS template string + JQuery,E,javascript
+56,https://github.com/MaxLeGrelle/Openhifi-frontend,a119d177d5f076295b34604943271dcd90a78da8,d8bc563f0dbee04253807a4daf121942fab55e96,false_positive,Jquery rule might detect,E,javascript
+57,https://github.com/MaxZell/Daily-ToDo,92451beae5209c3e16a171fd5db699626556ed0e,0b201b980a80d1b766f122e18e275ca4ae06c42a,false_positive,innerHTML -> textContent,E,clientside_javascript
+58,https://github.com/MaxiBal/Step-Counter,3d83278bbf5f97cfb970f21b8b6b611818bbabc5,1b02c670ac387e588de4be8f444dfe9278f0076e,false_positive,"Yikes, this ""fix"" might introduce a vulnerability. It disables escaping in an EJS template and simply replaces < and > for variables inside.
+
+In any case, we do not detect the actual vulnerability site, nor do we detect any ""steps"" in the process. We would potentially detect this with a JS template string rule.",E,express
+59,https://github.com/MeowKawaii/ywc,487057a2fa7e8b3ed0b4e16a4eb2100cb68d4903,0fa38f30e9d36a1d8e96de9534b4a8eb98b08fce,false_positive,dangerouslySetInnerHtml,E,react
+60,https://github.com/NG-ZORRO/ng-zorro-antd,a393b89bf82eece5b0586592d709629865b27b3a,077c8dee9e3829daff06ff1ac700bc271d6ddd41,false_positive,innerHTML,E,angular
+61,https://github.com/NarutoVPS/Envoy,3c2e890b99a80f8bd2b0bb20594871b93edbb8a6,00be0f1b354a1559242c61645efb6c36a3f4dfff,false_positive,innerHTML,E,express
+62,https://github.com/NoMoreDeps/marksjs,257bd7c936b44a79f2782339a2bfa4297deddc1f,64539b6fc86d51c627031e5563fb63101f061d13,false_positive,Homegrown rendered. Do not detect this.,E,
+63,https://github.com/OAC-TW/OAC-SPA,594996adf4f3898b9b8d723e1095bb7fac62a985,ac2acd1edb4eba45c70ac84418f54c0502d75780,false_positive,"JS template string might work. Either way, this is Vue.js",C,vue
+64,https://github.com/OWASP/Nettacker,4dea094892cccffb27f2f067c7042be20856d0a3,348b41a0da81b71cb9a5de829242288aafc27144 923dd111155ddc8f8e907e5e95227459cf517a59,true_positive,Real issue here is autoescape off in templates,B,flask
+65,https://github.com/OWASP/SecurityShepherd,b42460491a5c3fe115b4813e30bcd1755a8f39b1,4941a1c3df9994122041226b5668e38b56925e79,true_positive,"Got it. The sink is here:
+
+```
+85:                            out.write(htmlOutput + emailAddr);
+```",B,java_and_jsp
+66,https://github.com/OldaHorak/AdminLTE,903143a1e1c02b94ec1194b7cec65675755c14a9,d114eabfe6189892e0b33dc76d36b6b39ff37b29,false_positive,JQuery .html() function,E,
+67,https://github.com/OpenIdentityPlatform/commons,95cca08af6e094979850eaf4bcd974aaefad4966,326d96b2c3ee0489b455636485bbf30b15235abe,true_positive,"➜  commons git:(master) semgrep -f p/xss ui/commons/src/main/js/org/forgerock/commons/ui/com
+mon/components/Messages.js
+A new version of Semgrep is available. Please see https://github.com/returntocorp/semgrep#upgrading for more information.
+using config from https://semgrep.dev/p/xss. Visit https://semgrep.dev/registry to see all public rules.
+downloading config...
+running 61 rules...
+100%|█████████████████████████████████████████████████████████████████████████████████|61/61
+ui/commons/src/main/js/org/forgerock/commons/ui/common/components/Messages.js
+severity:warning rule:javascript.browser.security.raw-html-concat.raw-html-concat: User controlled data in a HTML string may result in XSS
+80:            console.info(msg.type + "":"", msg.message, msg);
+--------------------------------------------------------------------------------
+135:            this.$el.append(""<div role='alert' class='alert-system alert-message alert "" + alertClass
+136:                + ""'><i class='fa "" + alertIcon + ""'></i><span class='message'>"" + _.escape(this.list[0].message)
+137:                + ""</span></div>"");
+ran 61 rules on 1 files: 2 findings",A,
+68,https://github.com/PlayBoyFly/apollo,b5832dadb844cadcc1f3c36b9bcfa6b83f79c62d,77f801c80528e5206ad17d9e6b644b377512adff,true_positive,"➜  apollo git:(master) semgrep -f p/xss apollo-portal/src/main/resources/static/scripts/controller/SettingController.js
+A new version of Semgrep is available. Please see https://github.com/returntocorp/semgrep#upgrading for more information.
+using config from https://semgrep.dev/p/xss. Visit https://semgrep.dev/registry to see all public rules.
+downloading config...
+running 61 rules...
+100%|█████████████████████████████████████████████████████████████████████████████████|61/61
+apollo-portal/src/main/resources/static/scripts/controller/SettingController.js
+severity:warning rule:javascript.browser.security.raw-html-concat.raw-html-concat: User controlled data in a HTML string may result in XSS
+47:                org.text = item.orgName + '(' + item.orgId + ')';
+--------------------------------------------------------------------------------
+109:        var defaultSelectedDOM = '<option value=""' + _.escape(app.ownerName) + '"" selected=""selected"">' + _.escape(app.ownerName)
+110:            + '</option>';
+--------------------------------------------------------------------------------
+116:        var user = $('.' + $scope.userSelectWidgetId).select2('data')[0];
+--------------------------------------------------------------------------------
+129:                $('.' + $scope.userSelectWidgetId).select2(""val"", """");
+ran 61 rules on 1 files: 4 findings",B,clientside_javascript
+69,https://github.com/SFDO-Tooling/Metecho,416796be8395be6bb878cb990cf9d365c17c6d76,15b13d891abaffe38e8ef083e3a014e83f1b80d0,true_positive,"Detected global autoescape off!
+
+May still want to consider adding email XSS rules to Django XSS pack.",B,django
+70,https://github.com/SL-Lee/infosecurity-project-client,df44239e9a7ba702c455d48d16df913e13fbb190,e8f6312c3ddd13fec1d8239d0bb82a620d1816e2,true_positive,"Detected | safe filter.
+
+This fix also includes a replacement of innerHTML -> innerText.",A,flask
+71,https://github.com/SabrinaMarkon/react-next-airbnb-clone,f7730ed59e2d7e55e40b9359833dd3dc2fd80ffa,1b34b74de3edc200a89b3a314216ee59a1ca32ad,false_positive,dangerouslySetInnerHTML,E,express
+72,https://github.com/ScratchAddons/ScratchAddons,b9a52d6532c8514254c7cc1d8e18710dbedc41ff,7afa25ee920701fc73a8e167bb752a15adb5d6d2,false_positive,Replaces outerHTML. Does this behave similarly to innerHTML?,E,clientside_javascript
+73,https://github.com/SeanStaffiery/seanstaffiery.github.io,f6f5a7bb4e3104eed48890ac83d44ff5e5866dcf,d3c0864f1da28438d7e80fe7f2dd6d1b59b2a4aa,false_positive,Jquery might detect?,E,clientside_javascript
+74,https://github.com/Shopify/quilt,dec36405a80ebc686138c3504c372fb9578b2b93,153d270592373acc0d835625e2824599480cdbd0 8cce0f87cc1a5eff1a934120d24ba3eaf65f7610,false_positive,"Not detected, though from the looks of things this looks like an open redirect.",E,express — ts
+75,https://github.com/Siilwyn/cheers-receiver,35edc0ecd1d85141ae5c1006cd0f47f48457ac59,6bfee53210a53cbdcd29559a3fd5cfd4f7515a6c,false_positive,,C,other_javascript (micro)
+76,https://github.com/SithCult/Holobook,45fc74bfe40a3d8191265e4cfcad0f386b900a57,83e88389d79bebe21c832e517e5b967f1d1bcf80,false_positive,dangerouslySetInnerHTML,E,jsx (react)
+77,https://github.com/SneakyMini/m_short,d1e4ae9c7db65de58a50c00fe0fba744111728a4,7131d234642f23b0419d4a086979c6145555a7c3,false_positive,Technically an open redirect,E,clientside_javascript
+78,https://github.com/SnickersVsMars/webapp-ws20-projects,d25e6a55e5a583c377193abd4d841f40bbadec93,adac59f72a0a5d309dcf2f2110df1966e0555353,false_positive,innerHTML -> innerText,E,clientside_javascript
+79,https://github.com/Sonikboy/estudo_poker,298a4f8e58c070cd1d702f9e84a3ece5d145d15e,c0f8c29a4992c71d92e1de88bd1051c10540ec63,false_positive,innerHTML,E,express
+80,https://github.com/Steellow/solita-dev-academy-2021,b233fce2ebf42d447654923de7b128a7b7c675a8,37cd3cce590bab1d1145f09170f274fa2ebb7738,false_positive,JQuery rule might detect,E,clientside_javascript
+81,https://github.com/Steellow/solita-dev-academy-2021,f349a9586f017d8a9858857ff2e6342d1a74b577,fd5c3027c296be1e39ea82da648579f128dfeab7,false_positive,replaces $(...).html --> $(...).text. Similar to innerHTML -> innerText,E,clientside_javascript
+82,https://github.com/StyleShit/Elementor-Assignment,05986d6f16c254831d466c03f345ed36a8710012,d6e00d4253b6938e65c08d21646db83c0fcd0fd6,false_positive,innerHTML,E,clientside_javascript
+83,https://github.com/TKais/Hogwash,fd1ed9361fbd836febea5debb7d1c5c8f3999c77,cf68a17307763ad643d76facf4ff39f8ff227c08,false_positive,"there's a function that checks whether a query string is valid or not. Before it just printed things, but now it is a written function. ",E,clientside_javascript
+84,https://github.com/Taink/projet-web-s3,4c66d58711b4183d0b0c58e7b5fbb22786f672b3,1c07728916c40d4d98667dd283eb33164ee21974,false_positive,not sanitizing user input when passed into a res.send. Committer used safeHtml to sanitize,E,express
+85,https://github.com/ThewBear/do-forem,ab95635dc6ffab6fa6218de1ff1759927f78356e,bd13d21b4cb0da2aeb5f51ab2efa3cad86df07b5,false_positive,User input is used in served HTML in buildArticleHTML.js but not sanitized; this was not caught by our rules.,E,express
+86,https://github.com/Tim-28-Xml/rent-a-car,e96ac726ba7703a86e911ec0bc904790953eb7a9,76ea834e4a15739e1bb7a12423e42c0dcc280260,false_positive,Sanitization of user input; looks for whether user input contains </>. This seems like it would be hard to detect.,E,java_and_jsp
+87,https://github.com/Timmy-1994/106062-OacMap,0946ecec9e3b86a4bfacb59bbc5212129df85fb5,9607de59c4e9c65a377ff794422387c8083aba6f,false_positive,"Serving html that has user input passed into it. Client side issue, not detected.",E,clientside_javascript — ts
+88,https://github.com/UWB-ACM/crowfacts,5cfbdbfb48aad2d284cfcfc022e759f3a73c7534,1cf96d347e062041697902d020fe008491725c5b,false_positive,innerHTML XSS vuln; not sanitizing before calling innerHTML,E,javascript
+89,https://github.com/Ugo-Z/Project_Zzz,513124267729cf13504350739782d242209f3670,28662d37c322cfcec59ab64b84034cf37d21436c,false_positive,Setting this.X = <user supplied input> without sanitizing said user-supplied input. ,E,java_and_jsp
+90,https://github.com/UltimatePro-Grammer/websystem,715660fcfadea276944e47da8a85ae91f540f5b1,97c6fe5c9c31b263deeeb8ef64e6f1dd0d901e2d,false_positive,Another innerHTML vulnerability that was not detected.,E,javascript
+91,https://github.com/VeriBlock/vbk-ri-btc-explorer,03e5fe6e6185cbb7b8c48d3d173a1ff53184a580,718cbc02bd74f8788c8fcd2ae747b377f05d3e12,false_positive,"not sanitizing a string that comes from user when returning for error or returning for later use. Not caught, but should be.",E,express
+92,https://github.com/VeriBlock/vbk-ri-btc-explorer,551c183700eb8f75f6d367f8466fb764088c5ac8,03e5fe6e6185cbb7b8c48d3d173a1ff53184a580,false_positive,not sanitizing a string that comes from user when returning for error. Not caught. ,E,express
+93,https://github.com/VeriBlock/vbk-ri-btc-explorer,be2f05ff31193863ace1f4ef40ddc4ff339de1f9,5bf324fc406619952148ebbc3ac9fcaff3e778b1,false_positive,not sanitizing user input before returning html error or returning the user input for function; probably browser-side XSS that we didn't catch ,E,express
+94,https://github.com/WangHL0927/grafana,05d831df29be6d1b8f1d248ef408ee231fd15cf6,14b2dad9da08bf864a5519ed106cb248ee7d814f,false_positive,html concatenation. user input not sanitized before added to some html that is later rendered. ,E,express — ts
+95,https://github.com/Zayden16/m133-canban-board,7c7b2efc32d26cce4b0c332540e0024b5f308a96,89fb1fd3a59bcde79d989e8bb45052f52244cd2e,false_positive,user input (gotten by getElementId) not sanitized before passed into a var. we should look into writing rules for getElementId calls. ,E,clientside_javascript
+96,https://github.com/ZenMnky/blogful-zenmnky,2eaa8ed5c460241f3df1d9c95113fffc1e631c01,a31caa63bf81524f9a3d86f2865ebea8b4f5d411,false_positive,Removing a route that was vulnerable with innerHTML. ,E,express
+97,https://github.com/ZenMnky/blogful-zenmnky,a31caa63bf81524f9a3d86f2865ebea8b4f5d411,c0f593dd6e85d1309bbb49fb8974021cd815e995,false_positive,Not sanitizing user-based input before placing it into json response. Not sure if this actually fixes the issue. ,E,express
+98,https://github.com/adlister-arredondo-davis-singleterry/java-adlister,caa6a99f860303ba2180fd522d473493dc7bfffe,2c464b205cffc7b2f90471020ceba083ee1f65b2,true_positive,Caught!,B,java_and_jsp
+99,https://github.com/adobe/helix-redirect,6f9704648afb89a5fe84337b490b3b3ef26caedd,e163863cc83f7129775e47af742655e50a78c3d0,false_positive,"Possible xss in a href, not sure why we didn't catch this ",E,javascript
+100,https://github.com/aimeos/ai-admin-jqadm,4d1064d050c40c52ea9fd267f6187860f4ceea0d,14a7180568f589298b6fac2bee2d188a0cd5c875,false_positive,Another html -> text jquery client side vuln.,E,clientside_javascript
+101,https://github.com/alannabouloy/petful-server,8d082a5e430e622ad1a21fa7a3047f7281d75be5,593ffe8175df52f3f8e0f786ca74014afcfee001,false_positive,sanitizing user-passed in variable before serving it. Not detected.,E,express
+102,https://github.com/alleyinteractive/irving,3731639aefbe8e766b09b3d00fe030148e5dbc02,b79df7aecfdfc96f6963ec0b37b5c6082b4be298,false_positive,,A,javascript
+103,https://github.com/alleyinteractive/irving,d47e5c7d80f6f2be2683176c40bf0b44f95fbebe,b79df7aecfdfc96f6963ec0b37b5c6082b4be298 3731639aefbe8e766b09b3d00fe030148e5dbc02,false_positive,,E,javascript
+104,https://github.com/allinurl/goaccess,17a879f63a9ef08ae7ff092af3071f26f6088ed5,37ccfa24b73d5c7dcf52fa5fafd34b6866337699,true_positive,,A,javascript
+105,https://github.com/allinurl/goaccess,17a879f63a9ef08ae7ff092af3071f26f6088ed5,37ccfa24b73d5c7dcf52fa5fafd34b6866337699,true_positive,,A,dupe
+106,https://github.com/allinurl/goaccess,17a879f63a9ef08ae7ff092af3071f26f6088ed5,37ccfa24b73d5c7dcf52fa5fafd34b6866337699,true_positive,Caught! Uses triple braces as Mustache escape,A,javascript
+107,https://github.com/allinurl/goaccess,17a879f63a9ef08ae7ff092af3071f26f6088ed5,37ccfa24b73d5c7dcf52fa5fafd34b6866337699,true_positive,Caught! Uses triple braces as Mustache escape,A,dupe
+108,https://github.com/alphagov/collections,a8fb322737525b9468c89cea84bf53d8e85b1ad4,260c0a5246d34f47fc9e24b922cfcc4a372d3afa,true_positive,,A,rails
+109,https://github.com/alphagov/collections,a8fb322737525b9468c89cea84bf53d8e85b1ad4,260c0a5246d34f47fc9e24b922cfcc4a372d3afa,true_positive,,A,dupe
+110,https://github.com/alphagov/collections,a8fb322737525b9468c89cea84bf53d8e85b1ad4,260c0a5246d34f47fc9e24b922cfcc4a372d3afa,true_positive,"Textbook use of "".html_safe"" that was removed in the patch.",A,rails
+111,https://github.com/alphagov/collections,a8fb322737525b9468c89cea84bf53d8e85b1ad4,260c0a5246d34f47fc9e24b922cfcc4a372d3afa,true_positive,"Textbook use of "".html_safe"" that was removed in the patch.",A,dupe
+112,https://github.com/alphaparticlecode/wp-scratchpad,701d2c06eb4562f57c3a811e427c31569b1fceb0,57472684ffff6903cfa88dc65685569ea97eda2f,false_positive,,E,javascript
+113,https://github.com/alshapton/kb-api,0c1ff2b664eb501f07cb3a4e6762be5fd6571a44,8dafd71134ff205b902f794b87b4b162d5292712 bd649de1da9e4020f9273fff183a74edfadc0b07,false_positive,,E,flask
+114,https://github.com/alshapton/kb-api,1f514dead0f74ea3f85cbdccd49d67cdf7e258f8,fc996fb0b6ee23a0e19debae164ca009cdb0f988,false_positive,,E,flask
+115,https://github.com/alshapton/kb-api,8dafd71134ff205b902f794b87b4b162d5292712,0cb27dda0de46f3eb32bb35fe1c2b8d0433f785e 1f514dead0f74ea3f85cbdccd49d67cdf7e258f8,false_positive,,E,flask
+116,https://github.com/alshapton/kb-api,bd649de1da9e4020f9273fff183a74edfadc0b07,1f514dead0f74ea3f85cbdccd49d67cdf7e258f8,false_positive,,E,flask
+117,https://github.com/amdonov/lite-idp,57e41587d32a715597ae80576939fd44beaad802,6a843a3d28b726c0732c1ecb9eeb70c5f75a97a4 8db1f2fd48e7bc3b0e2163edbb6d94440b89a06a,false_positive,,E,clientside_javascript
+118,https://github.com/amido/stacks-webapp-template,f78cd1d6078be5cbfbeb2370c74a9bc2499f9036,818ce2cbf76ec8a5ec4f701e34ad59d8dcffa3e0,true_positive,,B,javascript —ts
+119,https://github.com/amirsanni/Video-Call-App-NodeJS,298a4f8e58c070cd1d702f9e84a3ece5d145d15e,c0f8c29a4992c71d92e1de88bd1051c10540ec63,false_positive,innerHTML,E,express
+120,https://github.com/amnona/dbbact-website,966aac3f4f4718cd4d7e1612cd6594ab03f2ee26,0380f28743572235460bb4b5df6afa70524a3f08,true_positive,,A,flask
+121,https://github.com/andreasvirkus/story-of-klaus,b6cc6b4916d594ac9f5aeed34d4c4c93dafc1a12,d213fac34cb495aa7f91715462f9f090c7e32f13,false_positive,,E,clientside_javascript
+122,https://github.com/andrepcg/roasted-mail,75b9c2a598e19dc66e74fba4722f0d2803e96749,cf12364c6080f6f52634c1ca11b1ea85d319ae85,false_positive,"not detected but looks like the fix introduces another vuln by using `html_safe`
+html = ''.html_safe",E,rails
+123,https://github.com/andrewisen/dj-bpm,82a9120114d06971cb69a27e4cc3906c595016b3,10300e204ba3f1ce88af3467804fb774f8c676b9,false_positive,,E,clientside_javascript
+124,https://github.com/ankushdharkar/SSR-with-React-step-by-step,519f23d183f6802850329b7399a9a50ead5b135b,61edfe5be2499d763c5fbb16b8fed2b77e37a54b,false_positive,,E,javascript
+125,https://github.com/annafamefuna/annafamefuna1,ea35b40b8cf25acc3d77a73415b96ce9f98db73c,1c176edec3337d6e8e8210bf8c4c0e4fed96f3ce,false_positive,innerHTML,E,javascript —ts 
+126,https://github.com/anuraghazra/github-readme-stats,0833e8531d0445dd461956b805e69a36d183f021,3c7220e4f7144f6cb068fd433c774f6db47ccb95,false_positive,XSS inside SVG - interesting one!,E,javascript
+127,https://github.com/anuraghazra/github-readme-stats,34b5dcb181cc96a38ff62bc31643e667be0daea9,3c7220e4f7144f6cb068fd433c774f6db47ccb95 0833e8531d0445dd461956b805e69a36d183f021,false_positive,,E,dupe
+128,https://github.com/apache/velocity-tools,e141828a4eb03e4b0224535eed12b5c463a24152,33248041dcb7091ac98787fea432bc253f4d67a8,true_positive,,A,java_and_jsp
+129,https://github.com/aquohn/happy-covid-whispers,14d3c977977f6e34f75e0ccbf710db7331cad164,ec8e5d51470f36129fbc95aee9a7ec3c8e57829e,true_positive,,A,express
+130,https://github.com/argoproj/argo,7b1d17a006378d8f3c2e60eb201e2add4d4b13ba,20c518ca81d0594efb46e6cec178830ff4ddcbea,true_positive,,A,go
+131,https://github.com/artbees/rails,b221a4dc43368a1b6f00476f7c5f6047c5c7eea4,fdbb1b74428bcf05e94e7361f04338dba626c1fb,false_positive,,E,rails
+132,https://github.com/artbees/rails,ddcca86f0ed5064140924c88cc5ad556d5ce32d4,91d1e818329525a3ac43cef961d5cbdccdac9ed1,false_positive,,E,rails
+133,https://github.com/artificialarea/bookmarks-server,fd272af7c3e22f77f6576ee116e85eea3017bfbb,1a974162a55a1115da7be94809727405584f0282,false_positive,expressjs `res.json()` direct response write,E,express
+134,https://github.com/astashov/liftosaur,f4ac805a56751c7476f595363f71109385ea8aa5,d4e1659a49e3df71e67fa290a6a5111bf37b42d5,false_positive,React vuln with dangerouslySetInnerHTML,E,javascript — ts
+135,https://github.com/audrey-audrey/wiki-map,ebbfac06689de72392f681469a25c6f040127b22,5cccf447fc626a80d6ba0f77213331f4082e0d82,false_positive,raw html concat,E,express
+136,https://github.com/ayoubbensakhria/proged,78462819a8c9c94b3448ded7e82e5424390837f6,5e724c25ffe74df9e7bec072f650fe5246f73040,true_positive,,B,django
+137,https://github.com/ayoubbensakhria/proged,8d8e10227ae0ce3e8fa85b7d01a8a32656fad3d3,78462819a8c9c94b3448ded7e82e5424390837f6,false_positive,,E,django
+138,https://github.com/baidu/amis,66a1f910b042a48fba1b992fe4fa61c463fe7e95,eb939b0e3f911797af9e27eece94661911dff2a4,false_positive,react rules,E,
+139,https://github.com/bastosmichael/Veterans-Lighthouse-API-Example,188fa720bbdc775125d46884bda47db2cccca106,15f72673f785b290328d29ca231da87a87394be2,false_positive,innerHTML,E,clientside_javascript
+140,https://github.com/bearp2d/Video-Chat-App,d312870f9b577c0e44a2f83dbc89cc13827f546c,84d57db5751bc1a9611b27324c870d6991c382bf,false_positive,,E,clientside_javascript
+141,https://github.com/beego/beego,6eeea141d885c16c2a01349d57da62c6379a45a2,b9fbcbd906412d37d86058c7aa62af1e33106fab 6c0db4db3d2553d9474970dcdf05d016c5a79f39,false_positive,,E,go
+142,https://github.com/beenotung/wallpaper,7204f8899fc52d0d47a457cb3db2ae0b2084f739,bd1ac1e2edefd453d70ad3f0c49261f0a69b2faf,false_positive,,E,javascript
+143,https://github.com/bencgreenberg/rails,b221a4dc43368a1b6f00476f7c5f6047c5c7eea4,fdbb1b74428bcf05e94e7361f04338dba626c1fb,false_positive,,E,rails
+144,https://github.com/bencgreenberg/rails,ddcca86f0ed5064140924c88cc5ad556d5ce32d4,91d1e818329525a3ac43cef961d5cbdccdac9ed1,false_positive,,E,rails
+145,https://github.com/bgdom/webrtc-secure-chat,5b0aaf620d9c13ffc987168fd73db3055282899d,67790c963aaeb539696c96b30cdd47de74836456,false_positive,browser rules,E,clientside_javascript
+146,https://github.com/blockba5her/neo-ui,04d9cd3e56c3569cb4ecf4c5bbbcd5bbc839aae5,d32a6f5bb68009f5914dbb106ad1058930b42f64,false_positive,"no real XSS, changing `replace` on `DOMPurify`
+but would be nice to have a rule for `""foobar"".replace('<'g, '&amp;')` etc...",E,clientside_javascript
+147,https://github.com/blokz/personal.community,3e589cf5ae1bc406f3c15e546eb0a3b3376f259b,e462fadf7706eaa5961428ff284b89318d1d013d,false_positive,innerHTML,E,clientside_javascript
+148,https://github.com/blokz/personal.community,e82f5468bcfbb8881d105e163625dff949d4800f,cad2031cbbe38dced0bcaa7782237de19223cd90,false_positive,innerHTML,E,clientside_javascript
+149,https://github.com/clubadm/clubadm,0f57ec0947dfe8cac4cecee3d19335d180faecd3,2ec8a428585918836e0da1aac2fe60e6f5c68f5d,true_positive,"TP because the variable 'prefetched' is rendered with '| safe'. This fix correctly addresses the issue but not on our ""paved road.""
+
+Regardless, Semgrep identified the other half of the issue which, if fixed, would also fix the XSS.",B,django
+150,https://github.com/lepture/mistune,f2fcec52653878f481cfd39f83b3796c9fce67c3,2c17deda92b09e5e4dbd5e49c07bf88d7de469fc,false_positive,"Did not detect. This is a home-grown HTML renderer. Perhaps we should write a rule that discourages this and encourages use of another framework.
+
+We may also consider writing HTML concat rules for all languages...",E,python
+151,https://github.com/colohan/dschat,f8b61d285b2b6ef757ed4ffae13fffc0f6bb8168,c2815132e1339f47714aa21f4f6b8986683835c6,false_positive,"This is another example of the ""don't concatenate HTML"" check that we realllly need to write.
+
+This will actually be detected by `javascript.jquery.security.audit.jquery-insecure-method.jquery-insecure-method`, but this is currently not included in `p/xss`.",E,clientside_javascript
+152,https://github.com/rapidpro/casepro,a4d86b313fa55668943d67c6613ee17c91483461,f28fd937d470f73e5cfcd823b8ce946500daafb7,true_positive,"These ""_render..."" functions are eventually rolled up into a template filter (see https://github.com/rapidpro/casepro/blob/d914275b45e8b2dd817bf775392e3a72264fdf08/templates/rules/rule_list.haml#L14) and dumped onto the page.
+
+The steps that lead to XSS are:
+1. ""_render..."" puts raw HTML into a string
+2. ""render_tests"" and ""render_actions"" render these strings using ""mark_safe"". <-- Semgrep detects this.
+3. ""render_tests"" and ""render_actions"" filters are called in the ""rule_list"" template.
+
+Semgrep does detect (2) which would make one aware of the potential XSS. Categorizing this as TP.
+
+Also, this is a dupe of https://3.23.15.159:5000/details/614.",B,django
+153,https://github.com/rapidpro/casepro,e37297af3355b098dceb7f31e8d7940abe4951ca,f28fd937d470f73e5cfcd823b8ce946500daafb7,true_positive,"Using mark_safe, also not escaping html correctly.",B,django
+154,https://github.com/sunny4381/shirasagi,abb7e321f49e3011caa7f7d40fb12030cc6bdc66,53a8e90c5f978821326f531f43a3c89ed96d3da4,true_positive,"Got it! Uses ""raw"" in a template
+https://github.com/shirasagi/shirasagi/pull/3627/commits/b23d0d2d2ddd398e9a2760aa0a0023c5935173c7#diff-e9eae8a8af3e7ae0b96948f1868b9d9e38292aaeef42864726c3109d144b086cL2",A,rails
+155,https://github.com/google/trillian-examples,f12b8528872d27d6880dbda6aa69c56768252ec8,881b0617f35a2209e1f5af4a21e8b2b3dc183b36,true_positive,Textbook case. TP,A,go
+156,https://github.com/Erudika/scoold,81b76db577a116fcd9c9a63a9c65c5c68814d7cc,47fd2f1d7d8050493a30d16a0f8253f3c28c4c35,true_positive,"Detected a direct write to responseWriter, which renders HTML using a StringBuilder.",A,java_and_jsp
+157,https://github.com/formio/formio.js,f38b61ae2f0792119f5156deba04921dee3e1a75,6188b6445b166d9526d83aef4382d1a597b774ee,false_positive,"Did not detect. Seems to use a home-grown template engine that mimics {{ }} style templates and regex-replaces these inline. 🤦‍♂️ 
+
+Looked around, I'm really not sure where things get rendered as HTML so I can't say any further how we might detect this. There's tons of indirection.",E,clientside_javascript
+158,https://github.com/togglz/togglz,b48b8265fdf801f542334fed65a48c3c9556f20a,97741f3e7ff69d01d118c31189deb3c75395bc11,true_positive,"This uses Java Minimal Template Engine, or JMTE (https://code.google.com/archive/p/jmte/).
+
+However, the flow goes: read HTML template -> process through JMTE -> send page back using outputStream.write(result.getBytes(UTF8));. We detect the last part.",B,java_and_jsp
+159,https://github.com/locustio/locust,0d118179709b4a60174810bae4db41d40e4c99ad,dd14aac36e1aaa99a8acdb8ab6ad926ef8843ca1,false_positive,Request.form getter was not sanitized. Not sure if we have a rule for this. ,E,flask
+160,https://github.com/fsmi/odie-client,bab201e58a7e4ce537ed7731127394383416b127,0dd590035ccd1793a96f9e92979a60aa4ec49d62,false_positive,"doesn't escape user input in documents files, leading to possible XSS. Not caught. We don't have rules yet that look explicitly for unescaped html, which I think is the issue in this case.
+
+Potential rule: look for HTML + JS template string",E,clientside_javascript
+161,https://github.com/mybb/mybb,37ad29dcd25489a37bdd89ebac761f22492558b0,1b25406ba6b6586f060547dc41e7af653f182276,true_positive,"These are now detected with `javascript.browser.security.raw-html-concat`
+
+
+➜  jscripts git:(37ad29dcd) semgrep -f p/xss bbcodes_sceditor.js
+A new version of Semgrep is available. Please see https://github.com/returntocorp/semgrep#upgrading for more information.
+using config from https://semgrep.dev/p/xss. Visit https://semgrep.dev/registry to see all public rules.
+downloading config...
+running 61 rules...
+100%|██████████|61/61
+bbcodes_sceditor.js
+severity:warning rule:javascript.browser.security.raw-html-concat.raw-html-concat: User controlled data in a HTML string may result in XSS
+61:				return '<div align=""' + ($.sceditor.escapeEntities(attrs.defaultattr) || 'left') + '"">' + content + '</div>';
+--------------------------------------------------------------------------------
+171:			return '<font data-scefontsize=""' + $.sceditor.escapeEntities(attrs.defaultattr) + '"" size=""' + size + '"">' + content + '</font>';
+
+
+
+--- OLD ---
+Escaping html entities using escapeEntities function. Not caught.",A,clientside_javascript
+162,https://github.com/PrismJS/prism,8bba4880202ef6bd7a1e379fe9aebe69dd75f7be,158caf52343e59a66c2351ff1d83648efe871e33,true_positive,"Now detected with raw-html-concat rule:
+
+➜  previewers git:(158caf52) semgrep -f p/xss prism-previewers.js
+A new version of Semgrep is available. Please see https://github.com/returntocorp/semgrep#upgrading for more information.
+using config from https://semgrep.dev/p/xss. Visit https://semgrep.dev/registry to see all public rules.
+downloading config...
+running 61 rules...
+100%|████████████|61/61
+prism-previewers.js
+severity:warning rule:javascript.browser.security.raw-html-concat.raw-html-concat: User controlled data in a HTML string may result in XSS
+65:					return func + '(' + angle + ',' + values.join(',') + ')';
+--------------------------------------------------------------------------------
+106:						return func + '(' + shape + ' ' + size + ' at ' + position + ',' + values.join(',') + ')';
+--------------------------------------------------------------------------------
+108:					return func + '(' + values.join(',') + ')';
+--------------------------------------------------------------------------------
+349:					this._elt.innerHTML = '<svg viewBox=""-20 -20 140 140"" width=""100"" height=""100"">' +
+350:						'<defs>' +
+351:						'<marker id=""prism-previewer-easing-marker"" viewBox=""0 0 4 4"" refX=""2"" refY=""2"" markerUnits=""strokeWidth"">' +
+352:						'<circle cx=""2"" cy=""2"" r=""1.5"" />' +
+353:						'</marker>' +
+354:						'</defs>' +
+355:						'<path d=""M0,100 C20,50, 40,30, 100,0"" />' +
+356:						'<line x1=""0"" y1=""100"" x2=""20"" y2=""50"" marker-start=""url(' + location.href + '#prism-previewer-easing-marker)"" marker-end=""url(' + location.href + '#prism-previewer-easing-marker)"" />' +
+357:						'<line x1=""100"" y1=""0"" x2=""40"" y2=""30"" marker-start=""url(' + location.href + '#prism-previewer-easing-marker)"" marker-end=""url(' + location.href + '#prism-previewer-easing-marker)"" />' +
+358:						'</svg>';
+
+--- OLD ---
+
+Appending to html without sanitization. Not caught.",A,clientside_javascript
+163,https://github.com/luci/luci-go,96a247a0405e30c18fc99b7cbd7a53365915fb35,274e2ed4f45b771158e2f72c40cd646c1e4398a1,false_positive,"Urls not being santized before passed into hrefs. I thought we would have caught this, but we didn't. Another case of not explicitly looking into html that hasn't been escaped?",E,clientside_javascript
+164,https://github.com/eduNEXT/edx-platform,4e94304c8c65ffa9821dc497ea06c9bba6bda767,17340353ea907fe65b2733efba0b7d4ca84f5ac5,false_positive,"We don't detect this. We need to add a rule for Django that deals with `trans` vulnerabilities.
+
+See https://edx.readthedocs.io/projects/edx-developer-guide/en/latest/preventing_xss/preventing_xss_in_django_templates.html#html-escaping-translations-in-django-templates",E,django
+165,https://github.com/bitpay/bitcore,f2808d49c2ae8c74f54b8143afe53686645ab7f1,3fe5867134f093f171634f7d23baf6326a7116ca,true_positive,Caught!,B,express
+166,https://github.com/OWASP/NodeGoat,7c293e721bd1e95be6f82475d295b9b10e3b584e,823d27b588807b09a9a100f298c12729bf5d2634,true_positive,"Canonical example. This is a purposely malicious app.
+
+Even though escaping is applied, the escaped data is used in a 'href' attribute, which could still result in XSS.",A,clientside_javascript
+167,https://github.com/adityahase/frappe,1fbec2c8a62e296a6f1170b1358f7b2077b2e673,211a45ae4fb5caa1e2075c62ca8a5b8aecd632be,false_positive,"Didn't catch this, no html escaping text in awesome_bar. This is a more subtle case of html append and output being passed into a context builder.",E,clientside_javascript
+168,https://github.com/flamingo-geocms/flamingo,1bbecac22181eb86aaa1fd952d8761c2d627d312,49a1748a53a9047568c2690624fad8229c899a4b,true_positive,"caught bad usage of response in ChooseApplicationActionBean, which extends ApplicationActionBean.",B,java_and_jsp
+169,https://github.com/breatheco-de/video-chat,0edb5437250e2a14263b730016665d7f1ee0ac39,bda65fc1362ac0b5057a8805277fb2d30176fef2,true_positive,,A,clientside_javascript
+170,https://github.com/bunopus/presentation-art-of-communications,b6cc6b4916d594ac9f5aeed34d4c4c93dafc1a12,d213fac34cb495aa7f91715462f9f090c7e32f13,false_positive,duplicate,E,clientside_javascript
+171,https://github.com/burstMembrane/starkdown,b93c034f0d2990fb9e2596b6ad79162e6b7a9033,99d5f110da0745d6d9fdf686551390f29f33fa53,false_positive,"todo:
+
+import {markdown} from 'markdown';
+const parsed = markdown.toHTML(text);",E,clientside_javascript
+172,https://github.com/canada-ca/tracker,7d8f6cfc1a5872572a41a31050d87afbb34acc1a,fa6d79b764775add1eb4890139534ef2057e7107,false_positive,react rule,E,clientside_javascript
+173,https://github.com/cdnjs/new-website,70a36cfdc51b48b1eb5b7e8e85e3adbfed52f658,697ad2e8cec3b9c17fc448c6c06375ab4e667eda 687a445782111c0ceaa60c4224ea0c891a573c3e,false_positive,,E,express
+174,https://github.com/chetans9/node-mysql-crud,26d205902891fdae06b00137f4dc0ceebb068239,694ce3d6eba4790dff02b7e5dc31ef6ad48b6069,true_positive,,A,express
+175,https://github.com/ciur/papermerge,78462819a8c9c94b3448ded7e82e5424390837f6,5e724c25ffe74df9e7bec072f650fe5246f73040,true_positive,,A,django
+176,https://github.com/ciur/papermerge,8d8e10227ae0ce3e8fa85b7d01a8a32656fad3d3,78462819a8c9c94b3448ded7e82e5424390837f6,false_positive,,E,django
+177,https://github.com/clinthawkes/capstone,6af74de821fbd1fbda45ba60fa3f714f308a65a4,74b7a4b6cea05f7fa62fdbaa71039378167ea246 e6008321f4671d514c1e30ad9428851cd799b04b,true_positive, ,A,flask
+178,https://github.com/clming/grafana,0284747c88eb9435899006d26ffaf65f89dec88e,c9e7796b33a91267895c8e7b13e2090ea5270aca,false_positive,,E,clientside_javascript
+179,https://github.com/clming/grafana,05d831df29be6d1b8f1d248ef408ee231fd15cf6,14b2dad9da08bf864a5519ed106cb248ee7d814f,false_positive,,E,clientside_javascript
+180,https://github.com/clming/grafana,341822450cfc61ac819cd2971c33c6c659ebf579,dd5814b51bab1b757d2d3d79b1efacfff2c35dd4,false_positive,,E,clientside_javascript
+181,https://github.com/clming/grafana,c53435f7a76f79a07bac2fe1a66827624e217a1c,c7e38fd47f6c67c2a98b3e7a25f6a556d1c1883c,false_positive,,E,clientside_javascript
+182,https://github.com/common-group/services-core,960fdeaf5af81e0e9e19aadc9bb1b4f42f129a96,69c3cb60b3b97cabd8d845a5c30612df05665ef1 ff946c461924b2bf8ecbc818fab968d4c3f7724b,false_positive,,E,rails
+183,https://github.com/commonquail/crontention,726c596ed5e5063c9e03eaea322151c9c6ab1f7f,5806a2502aac69bced0db27b5bd0141dfda3da8d 8c4b96defc40d8c14009f991dde473f0565b2d12,false_positive,innerHTML,E,clientside_javascript
+184,https://github.com/comsq/hack2020-pseudocoders-frontend,04f67063c52fc7ccb642f6b0d1ff7bf51cb2e1df,c46d14245175d51e264fd7433661a596d1d34ae1,false_positive,dangerouslySetInnerHTML,E,clientside_javascript
+185,https://github.com/contentful/the-example-app.py,5b8c7675e3ff34c9b4251c77f812df159b413e67,907a7f7955fd816424dc883b46146d49e213cccb e85995340b5562685cc73d78efe42d1d38494b99,false_positive,,E,flask
+186,https://github.com/coolguy284/node-server,00f367cf0c13e893f138e9ddccf570f326eba979,68daf6e4b5691d67559c336145e178ffe9634270,false_positive,innerHTML,E,clientside_javascript
+187,https://github.com/daekoon/ContractIO,8e2a4957ba3050faaae264345e3a64f0798f6bdc,feb8f15c164a69225733ccf80b2ecdec35d40586,false_positive,,E,rails
+188,https://github.com/danielsanfr/github-readme-stats,0833e8531d0445dd461956b805e69a36d183f021,3c7220e4f7144f6cb068fd433c774f6db47ccb95,false_positive,,E,clientside_javascript
+189,https://github.com/datawrapper/shared,1205083084440c90223ca08faeb6eddb0194fcce,81f0b3b8af5d3633dfaa0374c4864e66faad4c06,false_positive,,E,clientside_javascript
+190,https://github.com/david-fisher/320-F20-Track-II,fdc5d6e869ec7ad4d31436b0affa3b31897e59db,4b310101c42aacbdfdff7dc7273c6cade261c753,false_positive,,E,clientside_javascript
+191,https://github.com/desihub/nightwatch,1e47387a96d2d7d5aaf6ac69277f505e4f5fa6cd,e9954bc8721d1fb225a6082698e330d3cc1a7b1d 70685c9ddc6290074ec39d466f784f05de3f42db,false_positive,,E,flask
+192,https://github.com/desihub/nightwatch,e78f09ae9eeec16cf67793621b127b9cde408f88,495b27e2bdfee25ec629c989aa9126b10e8a8aee 479a72325489843ab4a4405b2270e9235f4573bd,false_positive,,E,flask
+193,https://github.com/dev-DTECH/Network,6e5182a243d994d7c9e241570e6563cfead2094f,bb0452e5059f3614ab600d2760a1eb2d017b8ccf fd6a2600eaca6b9b83306a65c11103a5202ecaa3,false_positive,,E,clientside_javascript
+194,https://github.com/dev-DTECH/Network,fd6a2600eaca6b9b83306a65c11103a5202ecaa3,9e5755c4ed00a7785f05e3ec647e29fbeb49a554,false_positive,,E,clientside_javascript
+195,https://github.com/dev2019zheng/grafana-caz,0284747c88eb9435899006d26ffaf65f89dec88e,c9e7796b33a91267895c8e7b13e2090ea5270aca,false_positive,,E,clientside_javascript
+196,https://github.com/dev2019zheng/grafana-caz,05d831df29be6d1b8f1d248ef408ee231fd15cf6,14b2dad9da08bf864a5519ed106cb248ee7d814f,true_positive,,A,clientside_javascript
+197,https://github.com/dev2019zheng/grafana-caz,341822450cfc61ac819cd2971c33c6c659ebf579,dd5814b51bab1b757d2d3d79b1efacfff2c35dd4,false_positive,,E,clientside_javascript
+198,https://github.com/dev2019zheng/grafana-caz,c53435f7a76f79a07bac2fe1a66827624e217a1c,c7e38fd47f6c67c2a98b3e7a25f6a556d1c1883c,false_positive,,E,clientside_javascript
+199,https://github.com/dexter58/hi,0edb5437250e2a14263b730016665d7f1ee0ac39,bda65fc1362ac0b5057a8805277fb2d30176fef2,true_positive,,A,clientside_javascript
+200,https://github.com/dlh89/treasure-dash,3b8482336a88ea2c4661f3054caa8b352f19d53a,8bff346f7744ef008291f558189b0e681560380f,false_positive,,E,clientside_javascript
+201,https://github.com/dlpezbel/SDS,c683cd03b939793f93a61202fa0a1541cbcfdc18,677f5a3cc6190afd3adb271b686b8effca1a823e,false_positive,,E,flask
+202,https://github.com/dlpezbel/SDS,ef7e825036ac2d07367cca326dc8af6d2ecce584,c2214233b71258c3509c1b3bfc34d44ba79d058c c683cd03b939793f93a61202fa0a1541cbcfdc18,false_positive,,E,flask
+203,https://github.com/dmitmel/dotfiles,df59241a576a6d5c5ac99fb487eb7941e786b8a0,0442601626c8f4142425c88ae1a51e081e005ee1,false_positive,,E,javascript
+204,https://github.com/dnnsmnstrr/github-readme-stats,0833e8531d0445dd461956b805e69a36d183f021,3c7220e4f7144f6cb068fd433c774f6db47ccb95,false_positive,,E,clientside_javascript
+205,https://github.com/dodona-edu/dodona,d2b6256d4a2f91eefa98bbc681d761603a0fa4fd,a04cf823a92daac8149fc137291423f176694049,false_positive,jquery $(...).html(...),E,clientside_javascript
+206,https://github.com/j3k2/wordshop,77680b4e0db1fa4d29bf2b00cbe28196543fd224,8ded829554b11dc1b22c285e8a75cd5f9a3fd56a,false_positive,"replacing script tag manually, not detected",E,
+207,https://github.com/mysociety/alaveteli,5c23e45a35faf8b0dba0f90a08c66ef110459769,fb1908cd2d8d42a12ae44a28624dda4f72ef4204,false_positive,,E,rails
+208,https://github.com/terrchen/gitlab,63d16c58b784d3864db6d30b4f8e1bde2d325a08,ac0ca4f1d50d2782083bc9912042c276fa6c6afa,false_positive,"prevents xss in group name validations, uses html safety sanitizer",E,rails
+209,https://github.com/Code-Institute-Org/edx-juniper,298d3554fe82648b6738c54e63864a80a28c7357,34589393ace95805d8e9237ea413cf4dcd0f881d,true_positive,"caught some, did not catch others. Django :D",B,django
+210,https://github.com/dolphin-emu/sadm,7b8e942093839b265025a53dc7b373e72e149937,fba1f7ad3f091c3bf3c7e1fac61efcfe551783a8,true_positive,,A,django
+211,https://github.com/mozilla/nucleus,3b62affb9c2e53da0256cf890b952aebb9bbc2fa,a7e25a6118ecb14367ac2738e6e3b67056c89252,false_positive,Safety mechanism -- using format-html is better than using format because it does more escaping.,E,django
+212,https://github.com/omaha-consulting/omaha-server,bdc6d2e1638bd4a0324868fa42f96f037ef80892,8ed550dfd66af90913f9471595b2a8654d86ff6d 303fa62a60a60c88d0e34b3a8aa2b107a250e156,false_positive,"redactorwidget perhaps vulnerable to XSS injection, replaced 
+
+sort of a strange XSS cover",E,
+213,https://github.com/tgs/django-badgekit-webhooks,e7d1e7dd1bd4061a085ed552062e39d2694efdcc,af1269ae4578f29e0b6d03a6d22a1a37ddf841dc,false_positive,"strips '=' in URLS now, not detected!",E,django
