@@ -8,7 +8,7 @@ You'll need `poetry` for installing dependencies.
 
 ### Summary Notebook
 
-Download the database from http://s3.us-west-2.amazonaws.com/web-assets.r2c.dev/presentations/lvbsides-xss-power-guardrails-v2.db. This is a large file, so it may take a while!
+Download the database from http://web-assets.r2c.dev/presentations/lvbsides-xss-power-guardrails-v2.db. This is a large file, so it may take a while!
 
 In the 'notebooks/' directory, install the dependencies using `poetry`. Then drop into a shell and launch the Jupyter Notebook.
 
